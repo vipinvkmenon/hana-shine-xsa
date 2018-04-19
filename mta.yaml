@@ -58,39 +58,7 @@ modules:
       - name: shine-uaa
       - name: shine-container
       - name: shine-core-db
-      - name: shine-auditlog
-
-  - name: shine-user-js
-    type: nodejs
-    path: user-js
-    properties: 
-      SAP_JWT_TRUST_ACL: "[{\"clientid\":\"*\",\"identityzone\":\"*\"}]"
-    provides: 
-      - name: user-js
-        properties:
-          url: "${default-url}"
-    requires:
-      - name: shine-uaa
-      - name: shine-scheduler
-      - name: shine-user-db
-      - name: shine-user-container
-      
-  - name: shine-user-java
-    type: java
-    path: user-java
-    provides: 
-      - name: user-java
-        properties:
-          url: "${default-url}"
-    requires:
-      - name: shine-uaa
-      - name: shine-scheduler
-      - name: shine-user-db
-      - name: shine-user-container
-        properties:
-         JBP_CONFIG_RESOURCE_CONFIGURATION: '[tomcat/webapps/ROOT/META-INF/context.xml:
-               {"service_name_for_DefaultDB" : "~{user-container-name}"}]'
-      
+    
   - name: shine-core-db
     type: hdb
     path: core-db
@@ -112,69 +80,6 @@ modules:
      - name: shine-user-container
        properties:
         TARGET_CONTAINER: ~{user-container-name}
- 
- 
-
-
-  
-
-
-  - name: shine-site-web
-    type: siteentry
-    path: site-web
-    parameters:
-       memory: 64M
-    requires:
-      - name: shine-uaa
-      - name: sap-portal-services-host
-      - name: user-js
-        group: destinations
-        properties:
-          name: user-backend
-          url: '~{url}'
-          forwardAuthToken: true
-      - name: controller
-        group: destinations
-        properties:
-          name: controller
-          url: ~{url}
-      - name: user-java
-        group: destinations
-        properties:
-          name: user-java-backend
-          url: '~{url}'
-          forwardAuthToken: true
-      - name: core-js
-        group: destinations
-        properties:
-          name: core-backend
-          url: '~{url}'
-          forwardAuthToken: true
-      - name: uaa 
-        group: destinations 
-        properties: 
-           name: uaa 
-           url: '~{url}' 
-           forwardAuthToken: true
-      - name: sapui5-provider
-        properties:
-          sapui5url: '~{url}'
-    properties:
-      NODE_TLS_REJECT_UNAUTHORIZED: "0"  
-
-  
-     
-     
-  - name: shine-site-content
-    type: sitecontent
-    path: site-content
-    parameters:
-       memory: 64M
-    requires:
-       - name: sap-portal-services-client
-       - name: shine-uaa
-    properties:
-      NODE_TLS_REJECT_UNAUTHORIZED: "0"  
 
 resources:
   - name: shine-auditlog
@@ -193,9 +98,6 @@ resources:
      service-name: shine-user-container
      config:
        schema: SHINE_USER12
-
-  - name: shine-scheduler
-    type: com.sap.xs.job-scheduler
 
   - name: shine-uaa
     type: com.sap.xs.uaa-space
@@ -231,20 +133,14 @@ resources:
          - xs_authorization.read
          - xs_authorization.write
          
-  - name: sap-portal-services-host
-    type: com.sap.portal.site-host
-    parameters:
-      config:
-        siteId : XSAC_SHINE
-        
-  - name: sap-portal-services-client
-    type: com.sap.portal.site-content
-    parameters:
-      config:
-        siteId : XSAC_SHINE
-
    
   - name: uaa 
+    properties: 
+      url: "https://<hostname>:3##32/uaa-security"
+  - name: user-js 
+    properties: 
+      url: "https://<hostname>:3##32/uaa-security"
+  - name: user-java 
     properties: 
       url: "https://<hostname>:3##32/uaa-security"
       
@@ -253,11 +149,7 @@ resources:
     parameters:
       provider-id: com.sap.ui5.dist.sapui5-dist-xsa.XSAC_UI5_FESV3:sapui5_fesv3
       version: "1.44.8"
-  - name: sap-portal-services-host-com.sap.refapps.shine
-    parameters:
-       config:
-          siteId: com.sap.refapps.shine
-    type: com.sap.portal.site-host
+
 
 
   - name: portal-uaa-com.sap.refapps.shine
